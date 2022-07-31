@@ -10,11 +10,11 @@
              from
                  (SELECT *
                   FROM ys_cardpool_attack
-                  WHERE probability >= 50
+                  WHERE probability >= #{probability}
                   UNION all
                   SELECT *
                   FROM ys_cardpool_restore
-                  WHERE probability >= 50
+                  WHERE probability >= #{probability}
                   order by rand()
                   limit 1) ar) art
     </select>
