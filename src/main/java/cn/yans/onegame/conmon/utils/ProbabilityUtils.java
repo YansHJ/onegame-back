@@ -5,7 +5,7 @@ import java.util.Random;
 public class ProbabilityUtils {
 
     public static int getProbability(){
-        Random random = new Random(100);
-        return random.nextInt();
+        Random random = new Random();
+        return random.nextInt(101);
     }
 }

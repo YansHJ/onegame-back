@@ -13,6 +13,6 @@ public class BaseCard {
     private double value;
     private int valueType;
     private double finalValue;
-    private Date createTime;
+    private String createTime;
     private String name;
 }
