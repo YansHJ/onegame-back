@@ -1,0 +1,47 @@
+package cn.yans.onegame.conmon.enumpkg;
+
+import lombok.Data;
+
+@Data
+public class RespData<T> {
+
+    private Integer code;
+
+    private String msg;
+
+    private T data;
+
+    public RespData() {
+        this.code = RespMsg.SUCCESS.getCode();
+        this.msg = RespMsg.SUCCESS.getMsg();
+    }
+
+    public RespData(T data){
+        this();
+        this.data = data;
+    }
+
+    public RespData (String msg){
+        this.code = RespMsg.SUCCESS.getCode();
+        this.msg = msg;
+    }
+
+    public RespData (String msg,T data){
+        this.code = RespMsg.SUCCESS.getCode();
+        this.msg = msg;
+        this.data = data;
+    }
+
+    public RespData<T> success(){
+        this.code = RespMsg.SUCCESS.getCode();
+        this.msg = RespMsg.SUCCESS.getMsg();
+        return this;
+    }
+
+    public RespData<T> fail(String msg){
+        this.code = RespMsg.FIAL.getCode();
+        this.msg = msg;
+        return this;
+    }
+
+}
