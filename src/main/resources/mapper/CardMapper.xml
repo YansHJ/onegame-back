@@ -6,12 +6,16 @@
     <select id="getOne" resultType="cn.yans.onegame.entity.BaseCard">
         select *
         from
-             (SELECT *
-             FROM ys_cardpool_attack a
-             UNION all
-             SELECT *
-             FROM ys_cardpool_restore r
-             order by rand() limit 1) ar
-        WHERE ar.probability >= 50;
+            (select *
+             from
+                 (SELECT *
+                  FROM ys_cardpool_attack
+                  WHERE probability >= 50
+                  UNION all
+                  SELECT *
+                  FROM ys_cardpool_restore
+                  WHERE probability >= 50
+                  order by rand()
+                  limit 1) ar) art
     </select>
 </mapper>
