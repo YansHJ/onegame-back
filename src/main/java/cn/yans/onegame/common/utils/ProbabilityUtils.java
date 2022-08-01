@@ -1,4 +1,4 @@
-package cn.yans.onegame.conmon.utils;
+package cn.yans.onegame.common.utils;
 
 import java.util.Random;
 

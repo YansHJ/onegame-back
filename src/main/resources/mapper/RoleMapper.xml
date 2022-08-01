@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yans.onegame.dao.mapper.RoleMapper">
+
+    <insert id="addRole">
+        insert into ys_player_role
+        (id,name,type,attribute_id,user_id,sex)
+        values
+        (#{role.id},#{role.name},#{role.type},#{role.attributeId},#{role.userId},#{role.sex})
+    </insert>
+
+    <insert id="addAttribute">
+        insert into ys_player_attribute
+        (id,base_attack,base_health,base_armor)
+        values
+        (#{att.id},#{att.baseAttack},#{att.baseHealth},#{att.baseArmor})
+    </insert>
+</mapper>

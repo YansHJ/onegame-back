@@ -1,4 +1,4 @@
-package cn.yans.onegame.conmon.enumpkg;
+package cn.yans.onegame.common.enumpkg;
 
 import lombok.Data;
 

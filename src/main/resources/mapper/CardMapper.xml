@@ -4,11 +4,7 @@
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.yans.onegame.dao.mapper.CardMapper">
     <select id="getOne" resultType="cn.yans.onegame.entity.BaseCard">
-        select *
-        from
-            (select *
-             from
-                 (SELECT *
+        SELECT *
                   FROM ys_cardpool_attack
                   WHERE probability >= #{probability}
                   UNION all
@@ -16,6 +12,9 @@
                   FROM ys_cardpool_restore
                   WHERE probability >= #{probability}
                   order by rand()
-                  limit 1) ar) art
+                  limit 1
     </select>
+    <sql id="baseCard">
+
+    </sql>
 </mapper>

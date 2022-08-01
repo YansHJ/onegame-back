@@ -1,4 +1,4 @@
-package cn.yans.onegame.conmon.config;
+package cn.yans.onegame.common.config;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
