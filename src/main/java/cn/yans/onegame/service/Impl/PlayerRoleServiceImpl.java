@@ -5,10 +5,13 @@ import cn.yans.onegame.dao.mapper.RoleMapper;
 import cn.yans.onegame.entity.PlayerAttribute;
 import cn.yans.onegame.entity.PlayerRole;
 import cn.yans.onegame.service.PlayerRoleService;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PlayerRoleServiceImpl implements PlayerRoleService {
@@ -36,12 +39,30 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         PlayerAttribute attribute = new PlayerAttribute();
         attribute.setBaseAttack(10L);
         attribute.setBaseHealth(10L);
+        attribute.setMaxHealth(10L);
         attribute.setBaseArmor(0L);
         attribute.setId(UUIDUtils.get16Uuid());
         role.setAttributeId(attribute.getId());
-        roleMapper.addRole(role);
-        roleMapper.addAttribute(attribute);
-        role.setAttribute(attribute);
+        //游客存Redis,存在7天 | 注册用户存数据库&Redis 14天，登录续期
+        if (role.getType() == 0){
+            role.setAttribute(attribute);
+            redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        }else {
+            roleMapper.addRole(role);
+            roleMapper.addAttribute(attribute);
+            role.setAttribute(attribute);
+            redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),14, TimeUnit.DAYS);
+        }
         return role;
+    }
+
+    @Override
+    public PlayerRole getRole(String id) {
+        //TODO 后期判断是否为注册角色，注册角色先查Redis，为空再查库
+        String roleJson = redisTemplate.opsForValue().get("role:" + id);
+        if (StringUtils.isBlank(roleJson)){
+            return new PlayerRole();
+        }
+        return JSON.parseObject(roleJson, PlayerRole.class);
     }
 }

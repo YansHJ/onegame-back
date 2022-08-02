@@ -54,4 +54,12 @@ public class BaseCard {
      * 概率
      */
     private int probability;
+    /**
+     * 描述
+     */
+    private String describe;
+    /**
+     * 卡牌颜色(根据品级)
+     */
+    private String color;
 }

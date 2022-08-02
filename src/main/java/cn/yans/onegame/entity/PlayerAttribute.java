@@ -23,6 +23,11 @@ public class PlayerAttribute {
     private Long baseHealth;
 
     /**
+     * 血量上限
+     */
+    private Long maxHealth;
+
+    /**
      * 基础护甲
      */
     private Long baseArmor;
@@ -31,4 +36,9 @@ public class PlayerAttribute {
      * 创建时间
      */
     private String create_time;
+
+    /**
+     * 0存在，1删除
+     */
+    private int delFlag;
 }

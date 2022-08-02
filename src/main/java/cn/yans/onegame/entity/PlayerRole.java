@@ -26,4 +26,9 @@ public class PlayerRole {
     private int sex;
 
     private PlayerAttribute attribute;
+
+    /**
+     * 0存在，1删除
+     */
+    private int delFlag;
 }
