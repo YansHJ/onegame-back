@@ -19,6 +19,9 @@ public class CardServiceImpl implements CardService {
     @Autowired
     private CardUtils cardUtils;
 
+    /**
+     * 概率抽卡
+     */
     @Override
     public List<BaseCard> getBaseCard(int quantity) {
         StopWatch sw = new StopWatch();
@@ -39,5 +42,11 @@ public class CardServiceImpl implements CardService {
         System.out.println("用时秒：" + sw.getTotalTimeSeconds());
         System.out.println(sw.prettyPrint());
         return cardUtils.initColor(cardList);
+    }
+
+    @Override
+    public BaseCard getById(String id) {
+
+        return cardMapper.getById(id);
     }
 }

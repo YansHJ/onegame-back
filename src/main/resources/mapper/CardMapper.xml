@@ -14,7 +14,13 @@
                   order by rand()
                   limit 1
     </select>
-    <sql id="baseCard">
-
-    </sql>
+    <select id="getById" resultType="cn.yans.onegame.entity.BaseCard">
+        SELECT *
+        from ys_cardpool_attack a
+        WHERE identifier = #{id}
+        UNION all
+        SELECT *
+        from ys_cardpool_restore r
+        WHERE identifier = #{id}
+    </select>
 </mapper>

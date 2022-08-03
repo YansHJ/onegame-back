@@ -44,4 +44,10 @@ public class RespData<T> {
         return this;
     }
 
+    public RespData<T> defeated(){
+        this.code = RespMsg.DEFEATED.getCode();
+        this.msg = RespMsg.DEFEATED.getMsg();
+        return this;
+    }
+
 }

@@ -7,4 +7,6 @@ import java.util.List;
 public interface CardService {
 
     List<BaseCard> getBaseCard(int quantity);
+
+    BaseCard getById(String id);
 }

@@ -27,7 +27,7 @@ public class BaseCard {
     /**
      * 基础数值
      */
-    private double value;
+    private Long value;
     /**
      * 数值类型
      */
