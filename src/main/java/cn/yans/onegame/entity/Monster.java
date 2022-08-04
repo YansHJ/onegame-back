@@ -1,6 +1,5 @@
 package cn.yans.onegame.entity;
 
-import cn.yans.onegame.entity.noindatabase.MonsterSkill;
 import lombok.Data;
 
 import java.util.List;
@@ -16,7 +15,11 @@ public class Monster {
     private int level;
     private int type;
     /**
-     * 技能,数据库存储Json串
+     * 技能实体集合
      */
     private List<MonsterSkill> skill;
+    /**
+     * 技能id的集合字符串
+     */
+    private String skillId;
 }

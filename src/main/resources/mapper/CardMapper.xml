@@ -3,14 +3,21 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.yans.onegame.dao.mapper.CardMapper">
-    <select id="getOne" resultType="cn.yans.onegame.entity.BaseCard">
+
+    <select id="getFromPack" resultType="cn.yans.onegame.entity.BaseCard">
         SELECT *
                   FROM ys_cardpool_attack
-                  WHERE probability >= #{probability}
+                  WHERE probability >= #{probability} and
+        <foreach collection="cards" index="index" item="item" separator="or">
+                identifier = #{item}
+        </foreach>
                   UNION all
                   SELECT *
                   FROM ys_cardpool_restore
-                  WHERE probability >= #{probability}
+                  WHERE probability >= #{probability} and
+        <foreach collection="cards" index="index" item="item" separator="or">
+                identifier = #{item}
+        </foreach>
                   order by rand()
                   limit 1
     </select>
@@ -22,5 +29,17 @@
         SELECT *
         from ys_cardpool_restore r
         WHERE identifier = #{id}
+    </select>
+
+    <select id="getFromAll" resultType="cn.yans.onegame.entity.BaseCard">
+        SELECT *
+        FROM ys_cardpool_attack
+        WHERE probability >= #{probability}
+        UNION all
+        SELECT *
+        FROM ys_cardpool_restore
+        WHERE probability >= #{probability}
+        order by rand()
+        limit 1
     </select>
 </mapper>

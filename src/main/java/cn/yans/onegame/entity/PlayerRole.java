@@ -2,6 +2,8 @@ package cn.yans.onegame.entity;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PlayerRole {
 
@@ -26,6 +28,7 @@ public class PlayerRole {
     private int sex;
 
     private PlayerAttribute attribute;
+    private List<String> cards;
 
     /**
      * 0存在，1删除

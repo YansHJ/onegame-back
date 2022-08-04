@@ -50,4 +50,10 @@ public class RespData<T> {
         return this;
     }
 
+    public RespData<T> victory(){
+        this.code = RespMsg.VICTORY.getCode();
+        this.msg = RespMsg.VICTORY.getMsg();
+        return this;
+    }
+
 }

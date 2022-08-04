@@ -7,7 +7,8 @@ public enum RespMsg {
     SUCCESS(200,"成功"),
     FIAL(400,"失败"),
     ERROR(500,"错误"),
-    DEFEATED(666,"打败了");
+    DEFEATED(999,"被打败了"),
+    VICTORY(666,"胜利");
 
     private final Integer code;
     private final String msg;

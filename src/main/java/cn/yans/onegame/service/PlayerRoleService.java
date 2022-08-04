@@ -7,4 +7,6 @@ public interface PlayerRoleService {
     PlayerRole initRole(PlayerRole playerRole);
 
     PlayerRole getRole(String id);
+
+    PlayerRole roleAddCard(String roleId,String cardId);
 }

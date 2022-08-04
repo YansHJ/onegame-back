@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -43,6 +45,11 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         attribute.setBaseArmor(0L);
         attribute.setId(UUIDUtils.get16Uuid());
         role.setAttributeId(attribute.getId());
+        //初始卡组
+        List<String> cards = new ArrayList<>();
+        cards.add("9cff6044aaa95fa3");
+        cards.add("b314b504cea921fb");
+        role.setCards(cards);
         //游客存Redis,存在7天 | 注册用户存数据库&Redis 14天，登录续期
         if (role.getType() == 0){
             role.setAttribute(attribute);
@@ -64,5 +71,19 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
             return new PlayerRole();
         }
         return JSON.parseObject(roleJson, PlayerRole.class);
+    }
+
+    @Override
+    public PlayerRole roleAddCard(String roleId,String cardId) {
+        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
+        if (StringUtils.isBlank(roleJson)){
+            return null;
+        }
+        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        List<String> cards = role.getCards();
+        cards.add(cardId);
+        role.setCards(cards);
+        redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
+        return role;
     }
 }

@@ -5,17 +5,14 @@ import cn.yans.onegame.entity.BaseCard;
 import cn.yans.onegame.entity.Monster;
 import cn.yans.onegame.entity.PlayerAttribute;
 import cn.yans.onegame.entity.PlayerRole;
-import cn.yans.onegame.entity.noindatabase.MonsterSkill;
+import cn.yans.onegame.entity.MonsterSkill;
 import cn.yans.onegame.service.BattleService;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -35,11 +32,11 @@ public class BattleServiceImpl implements BattleService {
         }
         //打败
         if (monster.getBaseHealth() <= 0){
-            redisTemplate.delete("monster:" + role.getId());
+            redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
             return null;
         }
         //更新怪物
-        redisTemplate.opsForValue().set("monster:" + role.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
         return monster;
     }
 
@@ -47,8 +44,8 @@ public class BattleServiceImpl implements BattleService {
     public Map<String,Object> underAttack(Monster monster, PlayerRole role) {
         List<MonsterSkill> skill = monster.getSkill();
         int probability = ProbabilityUtils.getProbability();
-        int index = changeMonsterSkill(skill, 0, probability, 0);
-        MonsterSkill monsterSkill = skill.get(index);
+        //通过抽取概率获取此次攻击
+        MonsterSkill monsterSkill = changeMonsterSkill(skill, probability);
         PlayerAttribute attribute = role.getAttribute();
         Long baseArmor = attribute.getBaseArmor();
         if (baseArmor - monsterSkill.getValue() <= 0) {
@@ -60,6 +57,7 @@ public class BattleServiceImpl implements BattleService {
         //打败
         if (attribute.getBaseHealth() <= 0) {
             redisTemplate.delete("role:" + role.getId());
+            redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
             return null;
         }
         role.setAttribute(attribute);
@@ -73,16 +71,42 @@ public class BattleServiceImpl implements BattleService {
     /**
      * 获取怪物的此次攻击
      * @param skill 技能组
-     * @param last 左边的限定
      * @param probability 随机值
-     * @param index index
-     * @return 抽中的index
+     * @return 抽中的skill
      */
-    private int changeMonsterSkill(List<MonsterSkill> skill,int last,int probability,int index){
-        MonsterSkill monsterSkill = skill.get(index);
-        if (last < probability && probability <= monsterSkill.getProbability()) {
-            return index;
+    private MonsterSkill changeMonsterSkill(List<MonsterSkill> skill,int probability){
+            List<MonsterSkill> tempList = new ArrayList<>();
+            do {
+                for (MonsterSkill monsterSkill : skill) {
+                    if (0 < probability && probability <= monsterSkill.getProbability()){
+                        tempList.add(monsterSkill);
+                    }
+                }
+                probability = ProbabilityUtils.getProbability();
+            }while (tempList.size() < 1);
+            probability  = new Random().nextInt(tempList.size());
+        return tempList.get(probability);
+    }
+
+    @Override
+    public PlayerRole getHeal(PlayerRole role, BaseCard card) {
+        PlayerAttribute attribute = role.getAttribute();
+        if (attribute.getBaseHealth() + card.getValue() >= attribute.getMaxHealth()){
+            attribute.setBaseHealth(attribute.getMaxHealth());
+        }else {
+            attribute.setBaseHealth(attribute.getBaseHealth() + card.getValue());
         }
-        return changeMonsterSkill(skill,monsterSkill.getProbability(),probability,index + 1);
+        role.setAttribute(attribute);
+        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        return role;
+    }
+
+    @Override
+    public PlayerRole increaseArmor(PlayerRole role, BaseCard card) {
+        PlayerAttribute attribute = role.getAttribute();
+        attribute.setBaseArmor(card.getValue() + attribute.getBaseArmor());
+        role.setAttribute(attribute);
+        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        return role;
     }
 }

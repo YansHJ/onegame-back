@@ -9,4 +9,10 @@
         from ys_monster
         where id = #{id}
     </select>
+
+    <select id="getMonsterSkill" resultType="cn.yans.onegame.entity.MonsterSkill">
+        select *
+        from ys_monster_skill
+        where id = #{id}
+    </select>
 </mapper>
