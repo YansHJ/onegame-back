@@ -4,6 +4,7 @@ import cn.yans.onegame.dao.mapper.GameLevelMapper;
 import cn.yans.onegame.entity.GameLevel;
 import cn.yans.onegame.service.GameLevelService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,9 @@ public class GameLevelServiceImpl implements GameLevelService {
         List<GameLevel> nextMap = mapList.stream().filter(o -> StringUtils.indexOf(o.getLast(), firstLevel.getId()) != -1).collect(Collectors.toList());
         List<GameLevel> nextGameLevel = new ArrayList<>();
         for (GameLevel gameLevel : nextMap) {
-            nextGameLevel.add(packageMap(gameLevel,nextNextMap));
+            GameLevel newGameLevel = new GameLevel();
+            BeanUtils.copyProperties(gameLevel,newGameLevel);
+            nextGameLevel.add(packageMap(newGameLevel,nextNextMap));
         }
         firstLevel.setNextGameLevel(nextGameLevel);
         return firstLevel;
