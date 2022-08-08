@@ -39,4 +39,9 @@ public class PlayerRole {
      * 当前所在层
      */
     private int layer;
+
+    /**
+     * 费用
+     */
+    private int balance;
 }

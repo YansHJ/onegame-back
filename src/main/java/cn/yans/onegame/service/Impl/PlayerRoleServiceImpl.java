@@ -2,8 +2,10 @@ package cn.yans.onegame.service.Impl;
 
 import cn.yans.onegame.common.utils.UUIDUtils;
 import cn.yans.onegame.dao.mapper.RoleMapper;
+import cn.yans.onegame.entity.BaseCard;
 import cn.yans.onegame.entity.PlayerAttribute;
 import cn.yans.onegame.entity.PlayerRole;
+import cn.yans.onegame.service.CardService;
 import cn.yans.onegame.service.PlayerRoleService;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +24,8 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RoleMapper roleMapper;
+    @Autowired
+    private CardService cardService;
 
     @Override
     public PlayerRole initRole(PlayerRole playerRole) {
@@ -50,7 +54,8 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         cards.add("9cff6044aaa95fa3");
         cards.add("b314b504cea921fb");
         role.setCards(cards);
-        role.setLayer(1);
+        role.setLayer(0);
+        role.setBalance(0);
         //游客存Redis,存在7天 | 注册用户存数据库&Redis 14天，登录续期
         if (role.getType() == 0){
             role.setAttribute(attribute);
@@ -96,7 +101,24 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         }
         PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
         role.setLayer(role.getLayer() + 1);
+        role.setBalance(role.getBalance() + 12);
         redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
         return role;
+    }
+
+    @Override
+    public List<BaseCard> getMyCard(String roleId) {
+        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
+        if (StringUtils.isBlank(roleJson)){
+            return null;
+        }
+        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        List<String> cards = role.getCards();
+        List<BaseCard> myCards = new ArrayList<>();
+        for (String cardId : cards) {
+            BaseCard card = cardService.getById(cardId);
+            myCards.add(card);
+        }
+        return myCards;
     }
 }
