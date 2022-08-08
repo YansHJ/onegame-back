@@ -48,5 +48,17 @@ public class PlayerRoleController {
         return new RespData<>(role);
     }
 
+    @GetMapping("/updateLayer")
+    public RespData<?> updateLayer(@RequestParam("roleId") String roleId){
+        if (StringUtils.isBlank(roleId)){
+            return new RespData<>().fail("参数有误");
+        }
+        PlayerRole role = roleService.updateLayer(roleId);
+        if (null == role){
+            return new RespData<>().fail("角色不存在");
+        }
+        return new RespData<>(role);
+    }
+
 
 }

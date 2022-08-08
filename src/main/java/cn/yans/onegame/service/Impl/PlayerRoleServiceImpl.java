@@ -50,6 +50,7 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         cards.add("9cff6044aaa95fa3");
         cards.add("b314b504cea921fb");
         role.setCards(cards);
+        role.setLayer(1);
         //游客存Redis,存在7天 | 注册用户存数据库&Redis 14天，登录续期
         if (role.getType() == 0){
             role.setAttribute(attribute);
@@ -83,6 +84,18 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         List<String> cards = role.getCards();
         cards.add(cardId);
         role.setCards(cards);
+        redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
+        return role;
+    }
+
+    @Override
+    public PlayerRole updateLayer(String roleId) {
+        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
+        if (StringUtils.isBlank(roleJson)){
+            return null;
+        }
+        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        role.setLayer(role.getLayer() + 1);
         redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
         return role;
     }

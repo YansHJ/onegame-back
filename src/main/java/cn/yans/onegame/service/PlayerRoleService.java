@@ -9,4 +9,6 @@ public interface PlayerRoleService {
     PlayerRole getRole(String id);
 
     PlayerRole roleAddCard(String roleId,String cardId);
+
+    PlayerRole updateLayer(String roleId);
 }

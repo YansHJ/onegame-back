@@ -26,9 +26,9 @@ public class GameLevelController {
         if (StringUtils.isBlank(id)){
             return new RespData<>().fail("参数有误");
         }
-        GameLevel map = gameLevelService.getMap(id);
-        List<GameLevel> list = new ArrayList<>();
-        list.add(map);
-        return new RespData<>(list);
+        List<List<GameLevel>> lists = gameLevelService.nextMap(id);
+//        List<GameLevel> list = new ArrayList<>();
+//        list.add(map);
+        return new RespData<>(lists);
     }
 }

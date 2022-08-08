@@ -34,4 +34,9 @@ public class PlayerRole {
      * 0存在，1删除
      */
     private int delFlag;
+
+    /**
+     * 当前所在层
+     */
+    private int layer;
 }
