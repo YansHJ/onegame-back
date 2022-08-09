@@ -27,14 +27,31 @@ public class CardServiceImpl implements CardService {
     public List<BaseCard> getBaseCard(int quantity, PlayerRole role) {
         List<String> cards = role.getCards();
         List<BaseCard> cardList = new ArrayList<>();
+        int a = 0;
+        int b = 0;
+        int c = 0;
         for (int i = 0; i < quantity; i++) {
             BaseCard oneCard;
             do {
                 int probability = ProbabilityUtils.getProbability();
                 oneCard = cardMapper.getFromPack(probability,cards);
+                if (null != oneCard){
+                    if (oneCard.getIdentifier().equals("9cff6044aaa95fa3")){
+                        a++;
+                    }
+                    if(oneCard.getIdentifier().equals("b314b504cea921fb")){
+                        b++;
+                    }
+                    if(oneCard.getIdentifier().equals("794cb2641c4992f7")){
+                        c++;
+                    }
+                }
             }while (null == oneCard);
             cardList.add(oneCard);
         }
+        System.out.println("斩：" + a);
+        System.out.println("疗：" + b);
+        System.out.println("甲：" + c);
         return cardUtils.initColor(cardList);
     }
 
