@@ -53,6 +53,7 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         List<String> cards = new ArrayList<>();
         cards.add("9cff6044aaa95fa3");
         cards.add("b314b504cea921fb");
+        cards.add("794cb2641c4992f7");
         role.setCards(cards);
         role.setLayer(0);
         role.setBalance(0);

@@ -59,6 +59,10 @@ public class BaseCard {
      */
     private String describe;
     /**
+     * 费用
+     */
+    private int price;
+    /**
      * 卡牌颜色(根据品级)
      */
     private String color;
