@@ -28,10 +28,10 @@ public class BattleServiceImpl implements BattleService {
         }else {
             monster.setBaseArmor(monsterArmor - card.getValue());
         }
-        //打败
+        //打败怪物
         if (monster.getBaseHealth() <= 0){
             redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
-            attackResultVO.setResultCode("999");
+            attackResultVO.setResultCode("666");
         }
         //更新怪物
         redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
