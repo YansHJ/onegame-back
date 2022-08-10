@@ -1,11 +1,7 @@
 package cn.yans.onegame.service.Impl;
 
 import cn.yans.onegame.common.utils.ProbabilityUtils;
-import cn.yans.onegame.entity.BaseCard;
-import cn.yans.onegame.entity.Monster;
-import cn.yans.onegame.entity.PlayerAttribute;
-import cn.yans.onegame.entity.PlayerRole;
-import cn.yans.onegame.entity.MonsterSkill;
+import cn.yans.onegame.entity.*;
 import cn.yans.onegame.service.BattleService;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +18,9 @@ public class BattleServiceImpl implements BattleService {
     private StringRedisTemplate redisTemplate;
 
     @Override
-    public Monster baseAttack(Monster monster, PlayerRole role, BaseCard card) {
+    public AttackResultVO baseAttack(Monster monster, PlayerRole role, BaseCard card) {
+        AttackResultVO attackResultVO = new AttackResultVO();
+        attackResultVO.setFinalAttackValue(card.getValue());
         Long monsterArmor = monster.getBaseArmor();
         if (monsterArmor - card.getValue() <= 0){
             monster.setBaseHealth((monsterArmor + monster.getBaseHealth()) - card.getValue());
@@ -33,11 +31,14 @@ public class BattleServiceImpl implements BattleService {
         //打败
         if (monster.getBaseHealth() <= 0){
             redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
-            return null;
+            attackResultVO.setResultCode("999");
         }
         //更新怪物
         redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
-        return monster;
+        attackResultVO.setCard(card);
+        attackResultVO.setRole(role);
+        attackResultVO.setMonster(monster);
+        return attackResultVO;
     }
 
     @Override

@@ -1,13 +1,11 @@
 package cn.yans.onegame.controller.base;
 
 import cn.yans.onegame.common.enumpkg.RespData;
+import cn.yans.onegame.entity.AttackResultVO;
 import cn.yans.onegame.entity.BaseCard;
 import cn.yans.onegame.entity.Monster;
 import cn.yans.onegame.entity.PlayerRole;
-import cn.yans.onegame.service.BattleService;
-import cn.yans.onegame.service.CardService;
-import cn.yans.onegame.service.MonsterService;
-import cn.yans.onegame.service.PlayerRoleService;
+import cn.yans.onegame.service.*;
 import com.alibaba.fastjson2.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +31,8 @@ public class BattleController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private BattleService battleService;
+    @Autowired
+    private SpecialCardService specialCardService;
 
     @GetMapping("/attack")
     public RespData<?> roleAttack(@RequestParam("monsterId")String monsterId,
@@ -49,12 +49,22 @@ public class BattleController {
         Monster monster = JSON.parseObject(monsterJson, Monster.class);
         BaseCard card = cardService.getById(cardId);
         //TODO 后续引入攻击力增幅概念，目前先基础伤害的加减
-        Monster finalMonster = battleService.baseAttack(monster, role, card);
-        //打败
-        if (null == finalMonster){
-            return new RespData<>().victory();
+        AttackResultVO attackResultVO = new AttackResultVO();
+        if (card.getValueType() == 1){
+            //基础卡
+            attackResultVO = battleService.baseAttack(monster, role, card);
+        }else if (card.getValueType() == 2){
+            //特殊效果卡(单独处理逻辑)
+            attackResultVO = specialCardService.attackCard(monster, role, card);
         }
-        return new RespData<>(finalMonster);
+        //打败
+        if (!StringUtils.isBlank(attackResultVO.getResultCode()) && attackResultVO.getResultCode().equals("666")){
+            return new RespData<>().victory(attackResultVO);
+        }
+        if (!StringUtils.isBlank(attackResultVO.getResultCode()) && attackResultVO.getResultCode().equals("999")){
+            return new RespData<>().defeated(attackResultVO);
+        }
+        return new RespData<>(attackResultVO);
     }
 
     /**
@@ -77,7 +87,7 @@ public class BattleController {
         Map<String, Object> resultMap = battleService.underAttack(monster, role);
         //被击败
         if (null == resultMap){
-            return new RespData<>().defeated();
+            return new RespData<>().defeated(null);
         }
         //"role" => role
         //"monsterSkill" => 使用的技能

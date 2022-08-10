@@ -44,15 +44,17 @@ public class RespData<T> {
         return this;
     }
 
-    public RespData<T> defeated(){
+    public RespData<T> defeated(T data){
         this.code = RespMsg.DEFEATED.getCode();
         this.msg = RespMsg.DEFEATED.getMsg();
+        this.data = data;
         return this;
     }
 
-    public RespData<T> victory(){
+    public RespData<T> victory(T data){
         this.code = RespMsg.VICTORY.getCode();
         this.msg = RespMsg.VICTORY.getMsg();
+        this.data = data;
         return this;
     }
 
