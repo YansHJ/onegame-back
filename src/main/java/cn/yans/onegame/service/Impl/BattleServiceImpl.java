@@ -1,21 +1,23 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.MonsterCacheUtils;
 import cn.yans.onegame.common.utils.ProbabilityUtils;
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.entity.*;
 import cn.yans.onegame.service.BattleService;
-import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class BattleServiceImpl implements BattleService {
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RoleCacheUtils roleCacheUtils;
+    @Autowired
+    private MonsterCacheUtils monsterCacheUtils;
 
     @Override
     public AttackResultVO baseAttack(Monster monster, PlayerRole role, BaseCard card) {
@@ -30,11 +32,11 @@ public class BattleServiceImpl implements BattleService {
         }
         //打败怪物
         if (monster.getBaseHealth() <= 0){
-            redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
+            monsterCacheUtils.deleteMonster(monster,role);
             attackResultVO.setResultCode("666");
         }
         //更新怪物
-        redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
+        monsterCacheUtils.initMonster(monster,role,4L);
         attackResultVO.setCard(card);
         attackResultVO.setRole(role);
         attackResultVO.setMonster(monster);
@@ -57,12 +59,12 @@ public class BattleServiceImpl implements BattleService {
         }
         //打败
         if (attribute.getBaseHealth() <= 0) {
-            redisTemplate.delete("role:" + role.getId());
-            redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
+            roleCacheUtils.deleteRole(role);
+            monsterCacheUtils.deleteMonster(monster,role);
             return null;
         }
         role.setAttribute(attribute);
-        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put("role",role);
         resultMap.put("monsterSkill",monsterSkill);
@@ -98,7 +100,7 @@ public class BattleServiceImpl implements BattleService {
             attribute.setBaseHealth(attribute.getBaseHealth() + card.getValue());
         }
         role.setAttribute(attribute);
-        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         return role;
     }
 
@@ -107,7 +109,7 @@ public class BattleServiceImpl implements BattleService {
         PlayerAttribute attribute = role.getAttribute();
         attribute.setBaseArmor(card.getValue() + attribute.getBaseArmor());
         role.setAttribute(attribute);
-        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         return role;
     }
 }

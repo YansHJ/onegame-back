@@ -7,7 +7,9 @@
     <select id="getFromPack" resultType="cn.yans.onegame.entity.BaseCard">
         SELECT *
                   FROM ys_cardpool_attack
-                  WHERE probability >= #{probability} and (
+                  WHERE probability >= #{probability}
+        and del_flag = 0
+        and(
         <foreach collection="cards" index="index" item="item" separator="or">
                 identifier = #{item}
         </foreach>
@@ -15,7 +17,9 @@
                   UNION all
                   SELECT *
                   FROM ys_cardpool_restore
-                  WHERE probability >= #{probability} and (
+                  WHERE probability >= #{probability}
+        and del_flag = 0
+        and(
         <foreach collection="cards" index="index" item="item" separator="or">
                 identifier = #{item}
         </foreach>

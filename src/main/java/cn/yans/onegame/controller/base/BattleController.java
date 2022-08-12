@@ -1,6 +1,8 @@
 package cn.yans.onegame.controller.base;
 
 import cn.yans.onegame.common.enumpkg.RespData;
+import cn.yans.onegame.common.utils.MonsterCacheUtils;
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.entity.AttackResultVO;
 import cn.yans.onegame.entity.BaseCard;
 import cn.yans.onegame.entity.Monster;
@@ -33,6 +35,10 @@ public class BattleController {
     private BattleService battleService;
     @Autowired
     private SpecialCardService specialCardService;
+    @Autowired
+    private RoleCacheUtils roleCacheUtils;
+    @Autowired
+    private MonsterCacheUtils monsterCacheUtils;
 
     @GetMapping("/attack")
     public RespData<?> roleAttack(@RequestParam("monsterId")String monsterId,
@@ -42,11 +48,10 @@ public class BattleController {
             return new RespData<>().fail("参数有误");
         }
         PlayerRole role = roleService.getRole(roleId);
-        String monsterJson = redisTemplate.opsForValue().get("monster:" + roleId + "-" + monsterId);
-        if (StringUtils.isBlank(monsterJson)){
+        Monster monster = monsterCacheUtils.getMonster(monsterId, roleId);
+        if (null == monster){
             return new RespData<>().fail("当前怪物不存在");
         }
-        Monster monster = JSON.parseObject(monsterJson, Monster.class);
         BaseCard card = cardService.getById(cardId);
         //TODO 后续引入攻击力增幅概念，目前先基础伤害的加减
         AttackResultVO attackResultVO = new AttackResultVO();
@@ -77,13 +82,11 @@ public class BattleController {
             return new RespData<>().fail("参数有误");
         }
         //取缓存
-        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
-        String monsterJson = redisTemplate.opsForValue().get("monster:" + roleId + "-" + monsterId);
-        if (StringUtils.isBlank(monsterJson) || StringUtils.isBlank(roleJson)){
+        Monster monster = monsterCacheUtils.getMonster(monsterId, roleId);
+        PlayerRole role = roleCacheUtils.getRole(roleId);
+        if (null == monster || null == role){
             return new RespData<>().fail("当前实体缓存不存在");
         }
-        Monster monster = JSON.parseObject(monsterJson, Monster.class);
-        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
         Map<String, Object> resultMap = battleService.underAttack(monster, role);
         //被击败
         if (null == resultMap){

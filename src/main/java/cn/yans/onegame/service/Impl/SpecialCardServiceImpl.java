@@ -1,5 +1,7 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.MonsterCacheUtils;
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.entity.*;
 import cn.yans.onegame.service.SpecialCardService;
 import com.alibaba.fastjson.JSON;
@@ -14,6 +16,11 @@ public class SpecialCardServiceImpl implements SpecialCardService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RoleCacheUtils roleCacheUtils;
+    @Autowired
+    private MonsterCacheUtils monsterCacheUtils;
+
     @Override
     public AttackResultVO attackCard(Monster monster, PlayerRole role, BaseCard card) {
         String identifier = card.getIdentifier();
@@ -42,8 +49,8 @@ public class SpecialCardServiceImpl implements SpecialCardService {
             attackResultVO.setCard(card);
             attackResultVO.setMonster(monster);
             attackResultVO.setRole(role);
-            deleteMonster(role,monster);
-            deleteRole(role);
+            monsterCacheUtils.deleteMonster(monster,role);
+            roleCacheUtils.deleteRole(role);
             return attackResultVO;
         }
         attribute.setBaseHealth(attribute.getBaseHealth() - (baseAttack/2));
@@ -52,31 +59,15 @@ public class SpecialCardServiceImpl implements SpecialCardService {
             attackResultVO.setResultCode("666");
             attackResultVO.setMsg("邪恶的声音:再多给我一点血！");
             monster.setBaseHealth(0L);
-            deleteMonster(role,monster);
+            monsterCacheUtils.deleteMonster(monster,role);
         }
         monster.setBaseHealth(monster.getBaseHealth() - (baseAttack * 2));
         attackResultVO.setCard(card);
         attackResultVO.setMonster(monster);
         attackResultVO.setRole(role);
-        updateMonster(role,monster);
-        updateRole(role);
+        monsterCacheUtils.initMonster(monster,role,4L);
+        roleCacheUtils.initRole(role,7L);
         return attackResultVO;
     }
 
-    private void deleteMonster(PlayerRole role,Monster monster){
-        redisTemplate.delete("monster:" + role.getId() + "-" + monster.getId());
-        redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
-    }
-
-    private void updateMonster(PlayerRole role,Monster monster){
-        redisTemplate.opsForValue().set("monster:" + role.getId() + "-" + monster.getId(), JSON.toJSONString(monster),4, TimeUnit.HOURS);
-    }
-
-    private void deleteRole(PlayerRole role){
-        redisTemplate.delete("role:" + role.getId());
-    }
-
-    private void updateRole(PlayerRole role){
-        redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
-    }
 }

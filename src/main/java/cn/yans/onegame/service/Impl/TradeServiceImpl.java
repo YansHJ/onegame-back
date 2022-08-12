@@ -1,5 +1,7 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.MonsterCacheUtils;
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.entity.PlayerRole;
 import cn.yans.onegame.service.TradeService;
 import com.alibaba.fastjson.JSON;
@@ -14,13 +16,18 @@ import java.util.concurrent.TimeUnit;
 public class TradeServiceImpl implements TradeService {
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RoleCacheUtils roleCacheUtils;
+    @Autowired
+    private MonsterCacheUtils monsterCacheUtils;
+
+
     @Override
     public PlayerRole buy(String roleId, int price) {
-        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
-        if (StringUtils.isBlank(roleJson)){
+        PlayerRole role = roleCacheUtils.getRole(roleId);
+        if (null == role){
             return null;
         }
-        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
         if (role.getBalance() <= 0){
             return null;
         }
@@ -28,7 +35,7 @@ public class TradeServiceImpl implements TradeService {
             return null;
         }
         role.setBalance(role.getBalance() - price);
-        redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8, TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         return role;
     }
 }

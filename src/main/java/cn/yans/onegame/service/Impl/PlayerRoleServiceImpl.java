@@ -1,5 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.common.utils.UUIDUtils;
 import cn.yans.onegame.dao.mapper.RoleMapper;
 import cn.yans.onegame.entity.BaseCard;
@@ -26,6 +27,8 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
     private RoleMapper roleMapper;
     @Autowired
     private CardService cardService;
+    @Autowired
+    private RoleCacheUtils roleCacheUtils;
 
     @Override
     public PlayerRole initRole(PlayerRole playerRole) {
@@ -60,12 +63,12 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         //游客存Redis,存在7天 | 注册用户存数据库&Redis 14天，登录续期
         if (role.getType() == 0){
             role.setAttribute(attribute);
-            redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),7, TimeUnit.DAYS);
+            roleCacheUtils.initRole(role,7L);
         }else {
             roleMapper.addRole(role);
             roleMapper.addAttribute(attribute);
             role.setAttribute(attribute);
-            redisTemplate.opsForValue().set("role:" + role.getId(), JSON.toJSONString(role),14, TimeUnit.DAYS);
+            roleCacheUtils.initRole(role,14L);
         }
         return role;
     }
@@ -73,47 +76,35 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
     @Override
     public PlayerRole getRole(String id) {
         //TODO 后期判断是否为注册角色，注册角色先查Redis，为空再查库
-        String roleJson = redisTemplate.opsForValue().get("role:" + id);
-        if (StringUtils.isBlank(roleJson)){
+        PlayerRole role = roleCacheUtils.getRole(id);
+        if (role == null){
             return new PlayerRole();
         }
-        return JSON.parseObject(roleJson, PlayerRole.class);
+        return role;
     }
 
     @Override
     public PlayerRole roleAddCard(String roleId,String cardId) {
-        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
-        if (StringUtils.isBlank(roleJson)){
-            return null;
-        }
-        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        PlayerRole role = roleCacheUtils.getRole(roleId);
         List<String> cards = role.getCards();
         cards.add(cardId);
         role.setCards(cards);
-        redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         return role;
     }
 
     @Override
     public PlayerRole updateLayer(String roleId) {
-        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
-        if (StringUtils.isBlank(roleJson)){
-            return null;
-        }
-        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        PlayerRole role = roleCacheUtils.getRole(roleId);
         role.setLayer(role.getLayer() + 1);
         role.setBalance(role.getBalance() + 12);
-        redisTemplate.opsForValue().set("role:"+roleId,JSON.toJSONString(role),8,TimeUnit.DAYS);
+        roleCacheUtils.initRole(role,7L);
         return role;
     }
 
     @Override
     public List<BaseCard> getMyCard(String roleId) {
-        String roleJson = redisTemplate.opsForValue().get("role:" + roleId);
-        if (StringUtils.isBlank(roleJson)){
-            return null;
-        }
-        PlayerRole role = JSON.parseObject(roleJson, PlayerRole.class);
+        PlayerRole role = roleCacheUtils.getRole(roleId);
         List<String> cards = role.getCards();
         List<BaseCard> myCards = new ArrayList<>();
         for (String cardId : cards) {
