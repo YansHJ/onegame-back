@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>cn.yans</groupId>
 	<artifactId>onegame</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.6.5 Alpha</version>
 	<name>onegame</name>
 	<description>one roguelike game</description>
 	<properties>
