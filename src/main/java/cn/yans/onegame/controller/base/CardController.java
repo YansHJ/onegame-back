@@ -21,6 +21,12 @@ public class CardController {
     @Autowired
     private RoleCacheUtils roleCacheUtils;
 
+    /**
+     * 角色从背包抽卡
+     * @param quantity 数量
+     * @param roleId 角色Id
+     * @return 卡组
+     */
     @GetMapping("/getInitCard")
     public RespData<?> getCard(int quantity,String roleId){
         if (quantity < 0){
@@ -30,16 +36,26 @@ public class CardController {
         if (null == role){
             return new RespData<>().fail("角色不存在");
         }
-        List<BaseCard> baseCard = cardService.getBaseCard(quantity,role);
+        List<BaseCard> baseCard = cardService.getPkgCardFromCache(quantity,role);
         return new RespData<>(baseCard);
     }
 
+    /**
+     * 从卡池随机抽卡
+     * @param quantity 数量
+     * @return 卡组
+     */
     @GetMapping("/drawCard")
-    public RespData<?> drawCard(int quantity){
+    public RespData<?> drawCard(int quantity,String roleId){
         if (quantity < 0){
             return new RespData<>().fail("参数有误");
         }
-        List<BaseCard> baseCards = cardService.drawCard(quantity);
+        List<BaseCard> baseCards = cardService.getDrawCardFromCache(quantity,roleId);
         return new RespData<>(baseCards);
+    }
+
+    @GetMapping("/refreshCardCache")
+    public void refreshCache(String roleId){
+        cardService.deleteCardCache(roleId);
     }
 }

@@ -11,5 +11,11 @@ public interface CardService {
 
     BaseCard getById(String id);
 
-    List<BaseCard> drawCard(int quantity);
+    List<BaseCard> drawBaseCard(int quantity);
+
+    List<BaseCard> getPkgCardFromCache(int quantity, PlayerRole role);
+
+    List<BaseCard> getDrawCardFromCache(int quantity, String roleId);
+
+    void deleteCardCache(String roleId);
 }

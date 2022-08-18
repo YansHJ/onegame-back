@@ -1,5 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.CardCacheUtils;
 import cn.yans.onegame.common.utils.CardUtils;
 import cn.yans.onegame.common.utils.ProbabilityUtils;
 import cn.yans.onegame.dao.mapper.CardMapper;
@@ -19,9 +20,11 @@ public class CardServiceImpl implements CardService {
     private CardMapper cardMapper;
     @Autowired
     private CardUtils cardUtils;
+    @Autowired
+    private CardCacheUtils cardCacheUtils;
 
     /**
-     * 概率抽卡
+     * 角色背包抽卡
      */
     @Override
     public List<BaseCard> getBaseCard(int quantity, PlayerRole role) {
@@ -44,8 +47,11 @@ public class CardServiceImpl implements CardService {
         return cardMapper.getById(id);
     }
 
+    /**
+     * 卡池抽卡
+     */
     @Override
-    public List<BaseCard> drawCard(int quantity) {
+    public List<BaseCard> drawBaseCard(int quantity) {
         List<BaseCard> cardList = new ArrayList<>();
         for (int i = 0; i < quantity; i++) {
             BaseCard oneCard;
@@ -56,5 +62,29 @@ public class CardServiceImpl implements CardService {
             cardList.add(oneCard);
         }
         return cardUtils.initColor(cardList);
+    }
+
+    @Override
+    public List<BaseCard> getPkgCardFromCache(int quantity, PlayerRole role) {
+        if (null == cardCacheUtils.getRoleCard(role.getId())){
+            List<BaseCard> baseCard = getBaseCard(quantity, role);
+            cardCacheUtils.setRoleCard(baseCard,role.getId());
+        }
+        return cardCacheUtils.getRoleCard(role.getId());
+    }
+
+    @Override
+    public List<BaseCard> getDrawCardFromCache(int quantity,String roleId) {
+        if (null == cardCacheUtils.getDrawCard(roleId)){
+            List<BaseCard> baseCards = drawBaseCard(quantity);
+            cardCacheUtils.setDrawCard(baseCards,roleId);
+        }
+        return cardCacheUtils.getDrawCard(roleId);
+    }
+
+    @Override
+    public void deleteCardCache(String roleId) {
+        cardCacheUtils.deleteDrawCard(roleId);
+        cardCacheUtils.deleteRoleCard(roleId);
     }
 }
