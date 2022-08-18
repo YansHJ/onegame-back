@@ -62,6 +62,11 @@ public class BaseCard {
      * 费用
      */
     private int price;
+
+    /**
+     * 消耗行动力
+     */
+    private int consumes;
     /**
      * 卡牌颜色(根据品级)
      */
