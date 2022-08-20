@@ -41,6 +41,7 @@ public class SpecialCardServiceImpl implements SpecialCardService {
         AttackResultVO attackResultVO = new AttackResultVO();
         PlayerAttribute attribute = role.getAttribute();
         long baseAttack = attribute.getMaxHealth();
+        card.setValue(baseAttack * 2);
         if (attribute.getBaseHealth() - (baseAttack/2) <= 0){
             attribute.setBaseHealth(0L);
             role.setAttribute(attribute);
