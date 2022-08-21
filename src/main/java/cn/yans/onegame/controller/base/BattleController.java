@@ -3,10 +3,7 @@ package cn.yans.onegame.controller.base;
 import cn.yans.onegame.common.enumpkg.RespData;
 import cn.yans.onegame.common.utils.MonsterCacheUtils;
 import cn.yans.onegame.common.utils.RoleCacheUtils;
-import cn.yans.onegame.entity.AttackResultVO;
-import cn.yans.onegame.entity.BaseCard;
-import cn.yans.onegame.entity.Monster;
-import cn.yans.onegame.entity.PlayerRole;
+import cn.yans.onegame.entity.*;
 import cn.yans.onegame.service.*;
 import com.alibaba.fastjson2.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +36,8 @@ public class BattleController {
     private RoleCacheUtils roleCacheUtils;
     @Autowired
     private MonsterCacheUtils monsterCacheUtils;
+    @Autowired
+    private ConsumablesCardService consumablesCardService;
 
     @GetMapping("/attack")
     public RespData<?> roleAttack(@RequestParam("monsterId")String monsterId,
@@ -55,10 +54,10 @@ public class BattleController {
         BaseCard card = cardService.getById(cardId);
         //TODO 后续引入攻击力增幅概念，目前先基础伤害的加减
         AttackResultVO attackResultVO = new AttackResultVO();
-        if (card.getValueType() == 1){
+        if (card.getCardValueType() == 1){
             //基础卡
             attackResultVO = battleService.baseAttack(monster, role, card);
-        }else if (card.getValueType() == 2){
+        }else if (card.getCardValueType() == 2){
             //特殊效果卡(单独处理逻辑)
             attackResultVO = specialCardService.attackCard(monster, role, card);
         }
@@ -105,7 +104,12 @@ public class BattleController {
         }
         PlayerRole role = roleService.getRole(roleId);
         BaseCard card = cardService.getById(cardId);
-        PlayerRole healedRole = battleService.getHeal(role, card);
+        HealResultVO healedRole = new HealResultVO();
+        if (card.getCardValueType() == 1){
+            healedRole = battleService.getHeal(role, card);
+        }else if (card.getCardValueType() == 2){
+            healedRole = battleService.getHeal(role, card);
+        }
         return new RespData<>(healedRole);
     }
 

@@ -16,11 +16,11 @@ public class TradeController {
     private TradeService tradeService;
 
     @GetMapping("/decrease")
-    public RespData<?> buy(@RequestParam("roleId") String roleId,@RequestParam("price") int price){
+    public RespData<?> buy(@RequestParam("roleId") String roleId,@RequestParam("cardId") String cardId){
         if (StringUtils.isBlank(roleId)){
             return new RespData<>().fail("参数有误");
         }
-        PlayerRole role = tradeService.buy(roleId, price);
+        PlayerRole role = tradeService.buy(roleId, cardId);
         if (null == role){
             return new RespData<>().fail("余额不足");
         }

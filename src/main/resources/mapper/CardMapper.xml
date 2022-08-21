@@ -35,16 +35,19 @@
         SELECT *
         from ys_cardpool_restore r
         WHERE identifier = #{id}
+        and del_flag = 0
     </select>
 
     <select id="getFromAll" resultType="cn.yans.onegame.entity.BaseCard">
         SELECT *
         FROM ys_cardpool_attack
         WHERE probability >= #{probability}
+        and del_flag = 0
         UNION all
         SELECT *
         FROM ys_cardpool_restore
         WHERE probability >= #{probability}
+        and del_flag = 0
         order by rand()
         limit 1
     </select>

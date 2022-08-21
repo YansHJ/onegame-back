@@ -31,7 +31,7 @@ public class BaseCard {
     /**
      * 数值类型
      */
-    private int valueType;
+    private int cardValueType;
     /**
      * 加成后最终数值
      */

@@ -92,7 +92,7 @@ public class BattleServiceImpl implements BattleService {
     }
 
     @Override
-    public PlayerRole getHeal(PlayerRole role, BaseCard card) {
+    public HealResultVO getHeal(PlayerRole role, BaseCard card) {
         PlayerAttribute attribute = role.getAttribute();
         if (attribute.getBaseHealth() + card.getValue() >= attribute.getMaxHealth()){
             attribute.setBaseHealth(attribute.getMaxHealth());
@@ -101,7 +101,11 @@ public class BattleServiceImpl implements BattleService {
         }
         role.setAttribute(attribute);
         roleCacheUtils.initRole(role,7L);
-        return role;
+        HealResultVO healResultVO = new HealResultVO();
+        healResultVO.setMsg("治疗+" + card.getValue());
+        healResultVO.setRole(role);
+        healResultVO.setCard(card);
+        return healResultVO;
     }
 
     @Override

@@ -47,8 +47,8 @@ public class PlayerRoleServiceImpl implements PlayerRoleService {
         //属性初始化
         PlayerAttribute attribute = new PlayerAttribute();
         attribute.setBaseAttack(10L);
-        attribute.setBaseHealth(10L);
-        attribute.setMaxHealth(10L);
+        attribute.setBaseHealth(30L);
+        attribute.setMaxHealth(30L);
         attribute.setBaseArmor(0L);
         attribute.setId(UUIDUtils.get16Uuid());
         role.setAttributeId(attribute.getId());
