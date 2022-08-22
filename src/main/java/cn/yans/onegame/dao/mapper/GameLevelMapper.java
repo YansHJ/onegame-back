@@ -9,4 +9,7 @@ import java.util.List;
 @Mapper
 public interface GameLevelMapper {
     List<GameLevel> getMap(@Param("firstNum") String firstNum);
+
+    GameLevel getMapByDifficulty(@Param("type")int type,@Param("diff") int difficulty);
+
 }

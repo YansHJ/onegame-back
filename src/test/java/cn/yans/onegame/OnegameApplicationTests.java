@@ -24,7 +24,7 @@ class OnegameApplicationTests {
 
 	@Test
 	void contextLoads() {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			System.out.println(UUIDUtils.get16Uuid());
 		}
 	}
@@ -57,9 +57,17 @@ class OnegameApplicationTests {
 
 	@Test
 	void mapperTest(){
-		GameLevel map = gameLevelService.getMap("0d07");
-		String s = JSON.toJSONString(map);
-		System.out.println(s);
+		System.out.println(3/4);
+		System.out.println(4/3);
+		System.out.println(5/3);
+		System.out.println(6/3);
+		System.out.println(7/3);
+		System.out.println(9/3);
+		System.out.println(10/3);
+		System.out.println(11/3);
+		System.out.println(12/3);
+		System.out.println(12/3);
+		System.out.println(12/3);
 	}
 
 }

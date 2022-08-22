@@ -20,6 +20,17 @@ public class GameLevel {
      */
     private int layer;
 
+    /**
+     * 金币奖励
+     */
+    private int goldAward;
+    /**
+     * 困难程度
+     */
+    private int difficulty;
+
+    private int delFlag;
+
     private List<GameLevel> nextGameLevel;
     private List<GameLevel> lastGameLevel;
 }

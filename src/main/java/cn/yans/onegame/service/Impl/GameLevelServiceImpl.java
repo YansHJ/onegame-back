@@ -1,5 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.UUIDUtils;
 import cn.yans.onegame.dao.mapper.GameLevelMapper;
 import cn.yans.onegame.entity.GameLevel;
 import cn.yans.onegame.service.GameLevelService;
@@ -8,9 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +22,7 @@ public class GameLevelServiceImpl implements GameLevelService {
 
     /**
      * 通过第一关的节点序号构建整幅地图
+     * 适用于，但也不是那么适用于固定关卡，后期改造
      */
     public GameLevel getMap(String firstNum) {
         List<GameLevel> mapList = gameLevelMapper.getMap(firstNum);
@@ -52,6 +52,9 @@ public class GameLevelServiceImpl implements GameLevelService {
         return null;
     }
 
+    /**
+     * 新版构建地图树，但是还是难于渲染，逐渐放弃，改用随机生成
+     */
     private List<List<GameLevel>> buildMapList(GameLevel firstLevel,List<List<GameLevel>> nextMapList,List<GameLevel> lastList){
         if (lastList.size() < 1) {
             return nextMapList;
@@ -92,4 +95,77 @@ public class GameLevelServiceImpl implements GameLevelService {
         firstLevel.setNextGameLevel(nextGameLevel);
         return firstLevel;
     }
+
+    /**
+     * 生成随机地图
+     */
+    private List<List<GameLevel>> initRandomMap(){
+        //获取生成随机层数（目前暂定10 - 15）
+        int layers = getLayers(10, 15);
+        //奖励
+        int reward = 0;
+        //精英
+        int elite = 0;
+        GameLevel firstMap = gameLevelMapper.getMapByDifficulty(1, 1);
+        firstMap.setId(UUIDUtils.get16Uuid());
+        String number = firstMap.getId().substring(0, 4);
+        //全局MapList
+        List<List<GameLevel>> mapList = new ArrayList<>();
+        mapList.add(Collections.singletonList(firstMap));
+        //难度
+        int diff = 4;
+        //Y轴
+        for (int i = 1; i < layers - 1; i++) {
+            //当前层获取随机选项
+            int x = getLayers(0, 4);
+            //当前层MapList
+            List<GameLevel> layerMap = new ArrayList<>();
+            //X轴
+            for (int i1 = 0; i1 < x; i1++) {
+                GameLevel map = new GameLevel();
+                if (reward == 2){
+                    //奖励关
+                    reward = 0;
+                    if (elite >= 5){
+                        elite--;
+                    }else {
+                        elite++;
+                    }
+                    map = gameLevelMapper.getMapByDifficulty(0, 0);
+                }else if (elite == 5){
+                    //精英
+                    elite = 0;
+                    reward++;
+                    map = gameLevelMapper.getMapByDifficulty(2, diff/4);
+                }else {
+                    //普通
+                    reward++;
+                    elite++;
+                    map = gameLevelMapper.getMapByDifficulty(1, diff/4);
+                }
+                map.setId(UUIDUtils.get16Uuid());
+                map.setNumber(number + "-" + layers + "-" + i1);
+                layerMap.add(map);
+            }
+            mapList.add(layerMap);
+            diff++;
+        }
+        //Boss
+        List<GameLevel> bossLayer = Collections.singletonList(gameLevelMapper.getMapByDifficulty(3, 1));
+        mapList.add(bossLayer);
+        return mapList;
+    }
+
+    /**
+     * 生成 pre - suf 范围之间的层数
+     */
+    private int getLayers(int pre,int suf){
+        Random random = new Random();
+        int layers;
+        do {
+            layers = random.nextInt(suf);
+        }while (layers < pre);
+       return layers;
+    }
+
 }

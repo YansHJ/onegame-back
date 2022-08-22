@@ -10,4 +10,14 @@
         where number like CONCAT(#{firstNum},'%')
     </select>
 
+    <select id="getMapByDifficulty" resultType="cn.yans.onegame.entity.GameLevel">
+        select *
+        from game_level
+        where difficulty = #{diff}
+        and type = #{type}
+        and del_flag = 0
+        order by rand()
+        limit 1
+    </select>
+
 </mapper>
