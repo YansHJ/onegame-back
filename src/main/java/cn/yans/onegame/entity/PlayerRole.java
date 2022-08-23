@@ -41,6 +41,11 @@ public class PlayerRole {
     private int layer;
 
     /**
+     * 随机地图编号
+     */
+    private String layerNumber;
+
+    /**
      * 费用
      */
     private int balance;

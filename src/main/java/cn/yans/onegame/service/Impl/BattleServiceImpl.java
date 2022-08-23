@@ -1,5 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.MapCacheUtils;
 import cn.yans.onegame.common.utils.MonsterCacheUtils;
 import cn.yans.onegame.common.utils.ProbabilityUtils;
 import cn.yans.onegame.common.utils.RoleCacheUtils;
@@ -18,6 +19,8 @@ public class BattleServiceImpl implements BattleService {
     private RoleCacheUtils roleCacheUtils;
     @Autowired
     private MonsterCacheUtils monsterCacheUtils;
+    @Autowired
+    private MapCacheUtils mapCacheUtils;
 
     @Override
     public AttackResultVO baseAttack(Monster monster, PlayerRole role, BaseCard card) {
@@ -57,10 +60,11 @@ public class BattleServiceImpl implements BattleService {
         } else {
             attribute.setBaseArmor(baseArmor - monsterSkill.getValue());
         }
-        //打败
+        //被打败
         if (attribute.getBaseHealth() <= 0) {
             roleCacheUtils.deleteRole(role);
             monsterCacheUtils.deleteMonster(monster,role);
+            mapCacheUtils.deleteMap(role.getId(), role.getLayerNumber());
             return null;
         }
         role.setAttribute(attribute);

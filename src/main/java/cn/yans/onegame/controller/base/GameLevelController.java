@@ -31,4 +31,13 @@ public class GameLevelController {
 //        list.add(map);
         return new RespData<>(lists);
     }
+
+    @GetMapping("/initRandomMap")
+    public RespData<?> getInitMap(@RequestParam("roleId")String roleId){
+        if (StringUtils.isBlank(roleId)){
+            return new RespData<>().fail("参数有误");
+        }
+        List<GameLevel> lists = gameLevelService.initRandomMap(roleId);
+        return new RespData<>(lists);
+    }
 }

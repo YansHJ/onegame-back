@@ -5,14 +5,17 @@ import cn.yans.onegame.dao.mapper.GameLevelMapper;
 import cn.yans.onegame.entity.GameLevel;
 import cn.yans.onegame.service.GameLevelService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class OnegameApplicationTests {
@@ -49,25 +52,30 @@ class OnegameApplicationTests {
 
 	@Test
 	void gameLevel(){
-		List<String> gameLevel = new ArrayList<>();
-		gameLevel.add("10ac1904b1ca14b6");
-		String s = JSON.toJSONString(gameLevel);
-		System.out.println(s);
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar c = Calendar.getInstance();
+		//当前日期设置为指定日期
+		c.setTime(new Date());
+		//指定日期月份减去一
+		c.add(Calendar.MONTH, -2);
+		//指定日期月份减去一后的 最大天数
+		c.set(Calendar.DATE, c.getActualMaximum(Calendar.DATE));
+		String lastDay = format.format(c.getTime());
+		System.out.println(lastDay);
 	}
 
 	@Test
 	void mapperTest(){
-		System.out.println(3/4);
-		System.out.println(4/3);
-		System.out.println(5/3);
-		System.out.println(6/3);
-		System.out.println(7/3);
-		System.out.println(9/3);
-		System.out.println(10/3);
-		System.out.println(11/3);
-		System.out.println(12/3);
-		System.out.println(12/3);
-		System.out.println(12/3);
+		List<List<GameLevel>> lists = gameLevelService.initRandomMap();
+		String mapJson = JSON.toJSONString(lists);
+
+		List<List<GameLevel>> newLists = new ArrayList<>();
+		List<String> strings = JSONArray.parseArray(mapJson, String.class);
+		for (String string : strings) {
+			newLists.add(JSONArray.parseArray(string,GameLevel.class));
+		}
+		System.out.println(newLists.get(0).get(0).getNumber());
+
 	}
 
 }

@@ -1,8 +1,11 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.MapCacheUtils;
+import cn.yans.onegame.common.utils.RoleCacheUtils;
 import cn.yans.onegame.common.utils.UUIDUtils;
 import cn.yans.onegame.dao.mapper.GameLevelMapper;
 import cn.yans.onegame.entity.GameLevel;
+import cn.yans.onegame.entity.PlayerRole;
 import cn.yans.onegame.service.GameLevelService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -18,6 +21,11 @@ public class GameLevelServiceImpl implements GameLevelService {
 
     @Autowired
     private GameLevelMapper gameLevelMapper;
+    @Autowired
+    private RoleCacheUtils roleCacheUtils;
+    @Autowired
+    private MapCacheUtils mapCacheUtils;
+
     @Override
 
     /**
@@ -51,6 +59,7 @@ public class GameLevelServiceImpl implements GameLevelService {
         }
         return null;
     }
+
 
     /**
      * 新版构建地图树，但是还是难于渲染，逐渐放弃，改用随机生成
@@ -97,9 +106,27 @@ public class GameLevelServiceImpl implements GameLevelService {
     }
 
     /**
+     * 获取随机地图
+     */
+    @Override
+    public List<GameLevel> initRandomMap(String roleId) {
+        PlayerRole role = roleCacheUtils.getRole(roleId);
+        if (null == role){
+            return null;
+        }
+        List<List<GameLevel>> mapList = initRandomMap();
+        if (StringUtils.isBlank(role.getLayerNumber())){
+            String number = mapCacheUtils.initMap(roleId, mapList);
+            role.setLayerNumber(number);
+        }
+        List<List<GameLevel>> map = mapCacheUtils.getMap(roleId,role.getLayerNumber());
+        roleCacheUtils.initRole(role,7L);
+        return map.get(role.getLayer());
+    }
+    /**
      * 生成随机地图
      */
-    private List<List<GameLevel>> initRandomMap(){
+    public List<List<GameLevel>> initRandomMap(){
         //获取生成随机层数（目前暂定10 - 15）
         int layers = getLayers(10, 15);
         //奖励
@@ -109,6 +136,7 @@ public class GameLevelServiceImpl implements GameLevelService {
         GameLevel firstMap = gameLevelMapper.getMapByDifficulty(1, 1);
         firstMap.setId(UUIDUtils.get16Uuid());
         String number = firstMap.getId().substring(0, 4);
+        firstMap.setNumber(number + "-1-1");
         //全局MapList
         List<List<GameLevel>> mapList = new ArrayList<>();
         mapList.add(Collections.singletonList(firstMap));
@@ -117,37 +145,34 @@ public class GameLevelServiceImpl implements GameLevelService {
         //Y轴
         for (int i = 1; i < layers - 1; i++) {
             //当前层获取随机选项
-            int x = getLayers(0, 4);
+            int x = getLayers(1, 5);
             //当前层MapList
             List<GameLevel> layerMap = new ArrayList<>();
             //X轴
             for (int i1 = 0; i1 < x; i1++) {
                 GameLevel map = new GameLevel();
-                if (reward == 2){
+                if (reward == 3){
                     //奖励关
                     reward = 0;
-                    if (elite >= 5){
-                        elite--;
-                    }else {
-                        elite++;
-                    }
                     map = gameLevelMapper.getMapByDifficulty(0, 0);
-                }else if (elite == 5){
+                }else if (elite >= 5){
                     //精英
                     elite = 0;
-                    reward++;
                     map = gameLevelMapper.getMapByDifficulty(2, diff/4);
                 }else {
                     //普通
-                    reward++;
-                    elite++;
                     map = gameLevelMapper.getMapByDifficulty(1, diff/4);
                 }
                 map.setId(UUIDUtils.get16Uuid());
-                map.setNumber(number + "-" + layers + "-" + i1);
+                map.setNumber(number + "-" + i + "-" + (i1+1));
                 layerMap.add(map);
             }
+            for (GameLevel gameLevel : layerMap) {
+                gameLevel.setLayer(Integer.parseInt(gameLevel.getNumber().split("-")[1]));
+            }
             mapList.add(layerMap);
+            elite++;
+            reward++;
             diff++;
         }
         //Boss
