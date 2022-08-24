@@ -25,7 +25,7 @@ public class MapCacheUtils {
      */
     public String initMap(String roleId, List<List<GameLevel>> gameLevelList){
         String number = gameLevelList.get(0).get(0).getNumber().split("-")[0];
-        redisTemplate.opsForValue().set("map:" + roleId + "-" + number, JSON.toJSONString(gameLevelList),8, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set("map:" + roleId + "-" + number, JSON.toJSONString(gameLevelList),15, TimeUnit.DAYS);
         return number;
     }
 

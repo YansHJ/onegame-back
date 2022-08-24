@@ -18,6 +18,9 @@ public class CardCacheUtils {
     public static final String ROLE_KEY = "card:role:";
     public static final String DRAW_KEY = "card:draw:";
 
+    /**
+     * 手牌
+     */
     public List<BaseCard> getRoleCard(String roleId){
         String result = redisTemplate.opsForValue().get(ROLE_KEY + roleId);
         if (StringUtils.isBlank(result)){
@@ -34,6 +37,9 @@ public class CardCacheUtils {
         redisTemplate.delete(ROLE_KEY + roleId);
     }
 
+    /**
+     * 商店出售牌
+     */
     public List<BaseCard> getDrawCard(String roleId){
         String result = redisTemplate.opsForValue().get(DRAW_KEY + roleId);
         if (StringUtils.isBlank(result)){

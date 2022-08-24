@@ -1,5 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
+import cn.yans.onegame.common.utils.DefeatUtils;
 import cn.yans.onegame.common.utils.MapCacheUtils;
 import cn.yans.onegame.common.utils.MonsterCacheUtils;
 import cn.yans.onegame.common.utils.RoleCacheUtils;
@@ -23,7 +24,8 @@ public class SpecialCardServiceImpl implements SpecialCardService {
     private MonsterCacheUtils monsterCacheUtils;
     @Autowired
     private MapCacheUtils mapCacheUtils;
-
+    @Autowired
+    private DefeatUtils defeatUtils;
     /**
      * 击败返回666
      * 被击败返回999
@@ -59,9 +61,8 @@ public class SpecialCardServiceImpl implements SpecialCardService {
             attackResultVO.setCard(card);
             attackResultVO.setMonster(monster);
             attackResultVO.setRole(role);
-            monsterCacheUtils.deleteMonster(monster,role);
-            roleCacheUtils.deleteRole(role);
-            mapCacheUtils.deleteMap(role.getId(), role.getLayerNumber());
+            //被打败
+            defeatUtils.beDefeated(monster,role);
             return attackResultVO;
         }
         attribute.setBaseHealth(attribute.getBaseHealth() - (baseAttack/2));
@@ -70,7 +71,8 @@ public class SpecialCardServiceImpl implements SpecialCardService {
             attackResultVO.setResultCode("666");
             attackResultVO.setMsg("邪恶的声音:再多给我一点血！");
             monster.setBaseHealth(0L);
-            monsterCacheUtils.deleteMonster(monster,role);
+            //打败
+            defeatUtils.defeatMonster(monster,role);
             attackResultVO.setCard(card);
             attackResultVO.setMonster(monster);
             attackResultVO.setRole(role);
@@ -98,16 +100,19 @@ public class SpecialCardServiceImpl implements SpecialCardService {
             if (monster.getBaseArmor() != 0){
                 monster.setBaseArmor(monster.getBaseArmor() - attribute.getBaseArmor());
                 if (monster.getBaseArmor() < 0){
+                    monster.setBaseHealth(monster.getBaseHealth() - (attribute.getBaseArmor() - monster.getBaseArmor()));
                     monster.setBaseArmor(0L);
                 }
             }else {
                 monster.setBaseHealth(monster.getBaseHealth() - attribute.getBaseArmor());
             }
+            attribute.setBaseArmor(attribute.getBaseArmor() / 2);
+            role.setAttribute(attribute);
         }
         if (monster.getBaseHealth() <= 0){
             attackResultVO.setResultCode("666");
             monster.setBaseHealth(0L);
-            monsterCacheUtils.deleteMonster(monster,role);
+            defeatUtils.defeatMonster(monster,role);
             attackResultVO.setCard(card);
             attackResultVO.setMonster(monster);
             attackResultVO.setRole(role);

@@ -1,9 +1,6 @@
 package cn.yans.onegame.service.Impl;
 
-import cn.yans.onegame.common.utils.MapCacheUtils;
-import cn.yans.onegame.common.utils.MonsterCacheUtils;
-import cn.yans.onegame.common.utils.ProbabilityUtils;
-import cn.yans.onegame.common.utils.RoleCacheUtils;
+import cn.yans.onegame.common.utils.*;
 import cn.yans.onegame.entity.*;
 import cn.yans.onegame.service.BattleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,13 @@ public class BattleServiceImpl implements BattleService {
     private MonsterCacheUtils monsterCacheUtils;
     @Autowired
     private MapCacheUtils mapCacheUtils;
+    @Autowired
+    private DefeatUtils defeatUtils;
 
+
+    /**
+     * 基础数值攻击
+     */
     @Override
     public AttackResultVO baseAttack(Monster monster, PlayerRole role, BaseCard card) {
         AttackResultVO attackResultVO = new AttackResultVO();
@@ -35,11 +38,12 @@ public class BattleServiceImpl implements BattleService {
         }
         //打败怪物
         if (monster.getBaseHealth() <= 0){
-            monsterCacheUtils.deleteMonster(monster,role);
+            defeatUtils.defeatMonster(monster,role);
             attackResultVO.setResultCode("666");
+        }else {
+            //更新怪物
+            monsterCacheUtils.initMonster(monster,role,4L);
         }
-        //更新怪物
-        monsterCacheUtils.initMonster(monster,role,4L);
         attackResultVO.setCard(card);
         attackResultVO.setRole(role);
         attackResultVO.setMonster(monster);
@@ -62,10 +66,10 @@ public class BattleServiceImpl implements BattleService {
         }
         //被打败
         if (attribute.getBaseHealth() <= 0) {
-            roleCacheUtils.deleteRole(role);
-            monsterCacheUtils.deleteMonster(monster,role);
-            mapCacheUtils.deleteMap(role.getId(), role.getLayerNumber());
+            defeatUtils.beDefeated(monster,role);
             return null;
+        }else {
+
         }
         role.setAttribute(attribute);
         roleCacheUtils.initRole(role,7L);
